@@ -51,16 +51,16 @@
         # try and download the correct toolchain.
         #
         # To prevent this, update the go.mod file to contain `go 1.21` instead of `go 1.21.5`.
-        go = pkgs.go_1_21;
-        nativeBuildInputs = [pkgs.musl breakpointHook];
+        go = pkgs.pkgsStatic.go_1_21;
+        nativeBuildInputs = [pkgs.pkgsStatic.musl];
 
         # Must be added due to bug https://github.com/nix-community/gomod2nix/issues/120
         pwd = ./.;
 
         # Optional flags.
         CGO_ENABLED = 1;
-        flags = ["-trimpath"];
-        ldflags = ["-s" "-w" "-linkmode external" "-extldflags '-static -L${pkgs.musl}/lib'"];
+        flags = ["-trimpath" "-buildmode=pie"];
+        ldflags = ["-s" "-w" "-linkmode external" "-extldflags -static"];
       };
     });
 
@@ -68,7 +68,7 @@
       system,
       pkgs,
     }: {
-      default = pkgs.mkShell {
+      default = pkgs.mkShell.override {stdenv = pkgs.pkgsStatic.stdenv;} {
         packages = with pkgs; [
           go_1_21
           gotools
